@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
@@ -9,16 +9,15 @@ RUN sed -i 's/Components: main/Components: main contrib non-free/' /etc/apt/sour
     ffmpeg \
     p7zip-full \
     qbittorrent-nox \
+    sabnzbdplus \
     git \
     curl \
     wget \
     unzip \
     gcc \
     python3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    sabnzbdplus \
+    libmagic1 \
+    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://downloads.rclone.org/rclone-current-linux-amd64.deb -o rclone.deb \

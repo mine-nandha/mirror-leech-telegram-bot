@@ -12,3 +12,4 @@ thumbnails/
 rclone/
 tokens/
 sabnzbd/*.sab
+credentials.json

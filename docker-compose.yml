@@ -1,6 +1,7 @@
 services:
   app:
-    build: .
+    image: ghcr.io/mine-nandha/mirror-leech-telegram-bot:latest
     command: bash start.sh
-    restart: on-failure
+    restart: unless-stopped
     network_mode: "host"
+    env_file: .env
