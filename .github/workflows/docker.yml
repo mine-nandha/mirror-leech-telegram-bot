@@ -71,6 +71,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Clean up credential files from runner
+        if: always()
+        run: rm -f token.pickle rclone.conf
+
       - name: Wait for registry propagation
         if: ${{ github.event_name != 'pull_request' && success() }}
         run: sleep 10
