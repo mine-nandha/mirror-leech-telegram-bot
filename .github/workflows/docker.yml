@@ -42,13 +42,16 @@ jobs:
 
       - name: Write token.pickle
         env:
-          TOKEN_PICKLE_B64: ${{ secrets.TOKEN_PICKLE_B64 }}
-        run: echo "$TOKEN_PICKLE_B64" | base64 -d > token.pickle
+          B64: ${{ secrets.TOKEN_PICKLE_B64 }}
+        run: base64 -d > token.pickle <<< "$B64"
 
       - name: Write rclone.conf
         env:
-          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
-        run: echo "$RCLONE_CONF_B64" | base64 -d > rclone.conf
+          B64: ${{ secrets.RCLONE_CONF_B64 }}
+        run: base64 -d > rclone.conf <<< "$B64"
+
+      - name: Verify credential files
+        run: ls -la token.pickle rclone.conf
 
       - name: Extract Docker metadata
         id: meta
