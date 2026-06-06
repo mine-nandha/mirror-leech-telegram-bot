@@ -486,11 +486,76 @@ see [Using Service Accounts](https://github.com/anasty17/mirror-leech-telegram-b
 
 Make sure you still mount the repo folder and installed the docker from official documentation.
 
-- There are two methods to build and run the docker:
-    1. Using official docker commands.
-    2. Using docker compose plugin. (Recommended)
+- There are three methods to build and run the docker:
+    1. Using GitHub Actions (Recommended — automates build & push to GHCR).
+    2. Using docker compose plugin.
+    3. Using official docker commands.
 
 ------
+
+<details>
+  <summary><h3>Using GitHub Actions (Recommended)</h3></summary>
+
+The repo includes `.github/workflows/docker.yml` which builds and pushes a Docker image to GHCR automatically on every push to `main`/`master` or version tag.
+
+**1. Set up GitHub Secrets**
+
+Go to your repo → Settings → Secrets and variables → Actions → New repository secret.
+
+| Secret | How to generate |
+|--------|----------------|
+| `TOKEN_PICKLE_B64` | `base64 -w0 token.pickle` — copy the output |
+| `RCLONE_CONF_B64` | `base64 -w0 rclone.conf` — copy the output |
+
+**2. Push to trigger the workflow**
+
+```
+git push origin main
+```
+
+This will:
+- Inject `token.pickle` and `rclone.conf` from secrets
+- Build a custom Docker image (python:3.11-slim with all system deps)
+- Push to `ghcr.io/<your-username>/mirror-leech-telegram-bot`
+- Sign the image with cosign
+- Keep only the latest 4 versions
+
+**3. Run the container**
+
+All config is passed via **environment variables** at runtime (no `config.py` needed):
+
+```bash
+docker run -d \
+  --name mltb \
+  --network host \
+  -e BOT_TOKEN="your_token" \
+  -e OWNER_ID=123456789 \
+  -e TELEGRAM_API=12345 \
+  -e TELEGRAM_HASH="your_hash" \
+  -e DATABASE_URL="mongodb://..." \
+  -e UPSTREAM_REPO="" \
+  ghcr.io/<your-username>/mirror-leech-telegram-bot:latest
+```
+
+Or use an `.env` file:
+
+```
+BOT_TOKEN=...
+OWNER_ID=...
+TELEGRAM_API=...
+TELEGRAM_HASH=...
+DATABASE_URL=...
+```
+
+```bash
+docker run -d --name mltb --network host --env-file .env ghcr.io/<your-username>/mirror-leech-telegram-bot:latest
+```
+
+**Note**: The bot reads config from env vars natively — see all available keys in `config_sample.py`. Only `BOT_TOKEN`, `OWNER_ID`, `TELEGRAM_API`, and `TELEGRAM_HASH` are required.
+
+------
+
+</details>
 
 <details>
   <summary><h3>Using Official Docker Commands</h3></summary>

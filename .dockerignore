@@ -1,1 +1,14 @@
-mltbenv/*
+mltbenv/
+.git/
+.gitignore
+__pycache__/
+*.pyc
+*.session
+downloads/
+log.txt
+cfg.zip
+accounts/*.json
+thumbnails/
+rclone/
+tokens/
+sabnzbd/*.sab

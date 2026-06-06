@@ -1,12 +1,28 @@
-FROM anasty17/mltb:latest
+FROM python:3.11-slim
 
 WORKDIR /app
-RUN chmod 777 /app
 
-RUN python3 -m venv mltbenv
+RUN apt-get update && apt-get install -y \
+    aria2 \
+    ffmpeg \
+    p7zip-full \
+    qbittorrent-nox \
+    sabnzbdplus \
+    git \
+    curl \
+    wget \
+    unzip \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://downloads.rclone.org/rclone-current-linux-amd64.deb -o rclone.deb \
+    && dpkg -i rclone.deb \
+    && rm rclone.deb
 
 COPY requirements.txt .
-RUN mltbenv/bin/pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
