@@ -40,19 +40,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Write token.pickle
-        env:
-          B64: ${{ secrets.TOKEN_PICKLE_B64 }}
-        run: base64 -d > token.pickle <<< "$B64"
-
-      - name: Write rclone.conf
-        env:
-          B64: ${{ secrets.RCLONE_CONF_B64 }}
-        run: base64 -d > rclone.conf <<< "$B64"
-
-      - name: Verify credential files
-        run: ls -la token.pickle rclone.conf
-
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
@@ -73,10 +60,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Clean up credential files from runner
-        if: always()
-        run: rm -f token.pickle rclone.conf
 
       - name: Wait for registry propagation
         if: ${{ github.event_name != 'pull_request' && success() }}

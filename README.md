@@ -498,46 +498,32 @@ Make sure you still mount the repo folder and installed the docker from official
 
 The repo includes `.github/workflows/docker.yml` which builds and pushes a Docker image to GHCR automatically on every push to `main`/`master` or version tag.
 
-**1. Set up GitHub Secrets**
-
-Go to your repo → Settings → Secrets and variables → Actions → New repository secret.
-
-| Secret | How to generate |
-|--------|----------------|
-| `TOKEN_PICKLE_B64` | `base64 -w0 token.pickle` — copy the output |
-| `RCLONE_CONF_B64` | `base64 -w0 rclone.conf` — copy the output |
-
-**2. Push to trigger the workflow**
+**1. Push to trigger the workflow**
 
 ```
 git push origin main
 ```
 
 This will:
-- Inject `token.pickle` and `rclone.conf` from secrets
-- Build a custom Docker image (python:3.11-slim with all system deps)
+- Build a custom Docker image (python:3.12-slim with all system deps)
 - Push to `ghcr.io/<your-username>/mirror-leech-telegram-bot`
 - Sign the image with cosign
 - Keep only the latest 4 versions
 
-**3. Run the container**
+**2. Prepare your local `.env` file**
 
-All config is passed via **environment variables** at runtime (no `config.py` needed):
+Copy and fill the config values from `.env` in the repo root. All config is passed via **environment variables** at runtime — no `config.py` needed. The bot reads config from env vars natively.
+
+For credential files (`token.pickle`, `rclone.conf`), encode them as base64 and add to your `.env`:
 
 ```bash
-docker run -d \
-  --name mltb \
-  --network host \
-  -e BOT_TOKEN="your_token" \
-  -e OWNER_ID=123456789 \
-  -e TELEGRAM_API=12345 \
-  -e TELEGRAM_HASH="your_hash" \
-  -e DATABASE_URL="mongodb://..." \
-  -e UPSTREAM_REPO="" \
-  ghcr.io/<your-username>/mirror-leech-telegram-bot:latest
+echo "TOKEN_PICKLE_B64=$(base64 -w0 /path/to/token.pickle)" >> .env
+echo "RCLONE_CONF_B64=$(base64 -w0 /path/to/rclone.conf)" >> .env
 ```
 
-Or use an `.env` file:
+These get decoded to files at container startup automatically.
+
+**3. Run the container**
 
 ```
 BOT_TOKEN=...
@@ -545,13 +531,15 @@ OWNER_ID=...
 TELEGRAM_API=...
 TELEGRAM_HASH=...
 DATABASE_URL=...
+TOKEN_PICKLE_B64=<base64 of token.pickle>
+RCLONE_CONF_B64=<base64 of rclone.conf>
 ```
 
 ```bash
 docker run -d --name mltb --network host --env-file .env ghcr.io/<your-username>/mirror-leech-telegram-bot:latest
 ```
 
-**Note**: The bot reads config from env vars natively — see all available keys in `config_sample.py`. Only `BOT_TOKEN`, `OWNER_ID`, `TELEGRAM_API`, and `TELEGRAM_HASH` are required.
+**Note**: The bot reads config from env vars — see all available keys in `config_sample.py`. Only `BOT_TOKEN`, `OWNER_ID`, `TELEGRAM_API`, and `TELEGRAM_HASH` are required. Credential files (`token.pickle`, `rclone.conf`) are generated from `TOKEN_PICKLE_B64` / `RCLONE_CONF_B64` at startup.
 
 ------
 
