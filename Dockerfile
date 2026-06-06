@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     p7zip-full \
     qbittorrent-nox \
-    sabnzbdplus \
     git \
     curl \
     wget \
@@ -22,7 +21,9 @@ RUN curl -fsSL https://downloads.rclone.org/rclone-current-linux-amd64.deb -o rc
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir sabnzbd \
+    && ln -s /usr/local/bin/sabnzbd /usr/local/bin/sabnzbdplus
 
 COPY . .
 
